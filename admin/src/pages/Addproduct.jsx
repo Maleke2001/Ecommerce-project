@@ -89,7 +89,7 @@ const AddProduct = () => {
         }
     } catch (error) {
         // If any error occurs, catch it and log the error message
-        console.error("Error while adding product:", error);
+        console.error("Error while  product:", error);
         alert(`Error: ${error.message}`);
     }
 };
