@@ -9,7 +9,7 @@ const userSchema = mongoose.Schema({
         unique:true
     },
     password:{
-        type:string
+        type:String
     },
     cartData:{
        type:Object
