@@ -7,6 +7,7 @@ import path from "path";
 import cors from "cors";
 import fs from "fs";
 import Product from "./models/Product.js"; 
+import User from "./models/User.js";
 
 
 const app = express(); 
@@ -111,6 +112,25 @@ app.get("/allproducts", async (req, res) => {
     }
 });
 
+
+//creating Endpoint for registering a user
+app.post('/signup', async (req, res) => {
+    try {
+      let check = await User.findOne({ email: req.body.email });
+      
+      if (check) {
+        return res.status(400).json({ success: false, message: "Existing user found with same email address" });
+      }
+      let cart = {};
+      
+      
+  
+    } catch (error) {
+      console.error("Couldn't register:", error);
+      res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+  });
+  
 
 // Start the server
 app.listen(port, (error) => {
