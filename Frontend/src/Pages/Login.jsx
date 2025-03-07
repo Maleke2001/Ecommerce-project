@@ -11,8 +11,32 @@ const Login = () => {
     setFormData({...FormData,[e.target.name]:e.target.value})
   }
  
-  const login = ()=>{
+  const login = async()=>{
    console.log("login executed", FormData)
+   try {
+    const response = await fetch('http://localhost:5000/login', {
+      method: "POST",
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(FormData),
+    });
+
+    // Ensure response is received and converted to JSON
+    const responseData = await response.json();
+
+    // Check if the response has a success key
+    if (responseData.success) {
+      localStorage.setItem('auth-token', responseData.token);
+      window.location.replace("/");
+    } else {
+      alert(responseData.errors || "Something you are using the same email ID");
+    }
+  } catch (error) {
+    console.error('Error during signup:', error);
+    alert("Signup failed. Please try again.");
+  }
   }
 
   const signup = async () => {

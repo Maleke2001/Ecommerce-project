@@ -12,6 +12,7 @@ const getDefaultCart = () => {
 };
 
 const ShopContextProvider = ({ children }) => {
+  // const [all_product,setAll_product] =useState([]);
   const [cartItems, setCartItems] = useState(getDefaultCart());
 
   console.log("cartItems in ShopContext:", cartItems); // Debugging

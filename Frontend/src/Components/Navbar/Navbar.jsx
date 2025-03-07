@@ -6,6 +6,7 @@ import { ShopContext } from '../../Context/ShopContext';
 
 const Navbar = () => {
   const { getTotalCartItems } = useContext(ShopContext);
+  const authToken = localStorage.getItem('auth-token');
 
   return (
     <div className="flex items-center justify-between p-6 text-black -mt-4">
@@ -16,31 +17,44 @@ const Navbar = () => {
 
       <ul className="flex space-x-6">
         <li className="hover:text-orange-600 cursor-pointer">
-          <Link to='/'>Shop</Link>
+          <Link to="/">Shop</Link>
         </li>
         <li className="hover:text-orange-600 cursor-pointer">
-          <Link to='/nike'>Nike</Link>
+          <Link to="/nike">Nike</Link>
         </li>
         <li className="hover:text-orange-600 cursor-pointer">
-          <Link to='/new-balance'>New Balance</Link>
+          <Link to="/new-balance">New Balance</Link>
         </li>
         <li className="hover:text-orange-600 cursor-pointer">
-          <Link to='/puma'>Puma</Link>
+          <Link to="/puma">Puma</Link>
         </li>
         <li className="hover:text-orange-600 cursor-pointer">
-          <Link to='/adidas'>Adidas</Link>
+          <Link to="/adidas">Adidas</Link>
         </li>
         <li className="hover:text-orange-600 cursor-pointer">
-          <Link to='/reebok'>Reebok</Link>
+          <Link to="/reebok">Reebok</Link>
         </li>
       </ul>
 
       <div className="flex items-center space-x-4">
-        <p className="hover:text-gray-400 cursor-pointer">
-          <Link to='/login'>Log in</Link>
-        </p>
+        {authToken ? (
+          <button
+            onClick={() => {
+              localStorage.removeItem('auth-token');
+              window.location.replace('/');
+            }}
+            className="hover:text-gray-400 cursor-pointer"
+          >
+            Logout
+          </button>
+        ) : (
+          <p className="hover:text-gray-400 cursor-pointer">
+            <Link to="/login">Log in</Link>
+          </p>
+        )}
+
         <div className="relative">
-          <Link to='/cart'>
+          <Link to="/cart">
             <FaShoppingCart className="text-2xl hover:text-gray-400 cursor-pointer" />
             <span className="absolute -top-3 -right-3 bg-orange-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
               {getTotalCartItems()}
