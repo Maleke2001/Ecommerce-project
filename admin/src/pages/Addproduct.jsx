@@ -20,7 +20,6 @@ const AddProduct = () => {
   const changeHandler = (e) => {
     setProductDetails({ ...productDetails, [e.target.name]: e.target.value });
   };
-  
 
   const add_Product = async (e) => {
     // Prevent the default behavior of the form submission (e.g., page reload)
@@ -39,7 +38,7 @@ const AddProduct = () => {
 
     try {
         // First, attempt to upload the image to the server
-        const uploadResponse = await fetch("http://localhost:5000/upload", {
+        const uploadResponse = await fetch("http://localhost:5000/api/upload/upload", {
             method: "POST", // The HTTP method is POST because we're sending data
             headers: { Accept: "application/json" }, // Tell the server we expect a JSON response
             body: formData, // Send the FormData as the request body
@@ -63,7 +62,7 @@ const AddProduct = () => {
         console.log("Updated product details:", productDetails);
 
         // Next, attempt to add the product to the database
-        const addProductResponse = await fetch("http://localhost:5000/addproduct", {
+        const addProductResponse = await fetch("http://localhost:5000/api/product/addproduct", {
             method: "POST", // Again, we're sending data to the server
             headers: {
                 Accept: "application/json", // Expect a JSON response
@@ -89,11 +88,10 @@ const AddProduct = () => {
         }
     } catch (error) {
         // If any error occurs, catch it and log the error message
-        console.error("Error while  product:", error);
+        console.error("Error while adding product:", error);
         alert(`Error: ${error.message}`);
     }
 };
-
 
   return (
     <div className="max-w-xl mx-auto p-6 bg-white rounded-lg shadow-md">
