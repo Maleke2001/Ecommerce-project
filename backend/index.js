@@ -6,6 +6,7 @@ import productRoutes from "./routes/product.route.js";
 import userRoutes from "./routes/user.router.js";
 import uploadRoutes from "./routes/upload.routes.js"; // Import upload route
 import fs from "fs";
+import categoryRoutes from "./routes/category.routes.js";
 
 dotenv.config();
 
@@ -32,6 +33,8 @@ app.use("/api/upload", uploadRoutes);
 app.use("/api/product", productRoutes);
 app.use("/api/auth", userRoutes);
 app.use("/api/upload", uploadRoutes);  // Register upload route
+app.use("/api/category", categoryRoutes)
+
 
 // Start the server
 app.listen(port, () => {

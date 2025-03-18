@@ -7,6 +7,8 @@ import Item from "../Components/Item/Item";
 const ShopCategory = (props) => {
   const { all_product } = useContext(ShopContext);
 
+  console.log(all_product);
+
   return (
     <div>
     <div className="relative w-full h-[300] md:h-[400px] lg:h-[450px] flex items-center justify-between bg-gradient-to-r from-orange-200 to-orange-100">
@@ -42,10 +44,10 @@ const ShopCategory = (props) => {
       </div>
      </div> 
 
-     <div className="py-[20px] px-[170px] grid grid-cols-4 gap-[350px] ">
+     <div className="py-[20px] px-[170px] grid grid-cols-4 gap-[350px] border">
       {
      all_product.map((item, i) => {
-      if (props.category === item.category) {
+      // if (props.category === item.category) {
       return (
         <Item
           key={i}
@@ -56,19 +58,15 @@ const ShopCategory = (props) => {
           old_price={item.old_price}
         />
       );
-    }
-    return null;
-  })
+    // }
+    // return null;
+  }) 
 } 
      </div>
      <div className=" flex justify-center items-center my-[100px] mx-auto w-[233px] h-[69px] bg-gray-300 text-black text-[18px] font-medium rounded-full">
       Explore MOre
      </div>
-
     </div>
-
-
-    
   );
 };
 

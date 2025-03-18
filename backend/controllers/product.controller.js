@@ -1,3 +1,4 @@
+import Category from "../models/Category.js";
 import Product from "../models/Product.js";
 
 export const createProduct = async (req, res) => {
@@ -13,6 +14,18 @@ export const createProduct = async (req, res) => {
             });
         }
 
+        // Check if category exists before creating the product
+        const categoryExist = await Category.findById(category);
+        if (!categoryExist) {
+            return res.status(400).json({
+                success: false,
+                message: "Category doesn't exist"
+            });
+        }
+
+
+
+        // Create and save the product after validation
         const product = new Product({
             name,
             image,
@@ -23,7 +36,7 @@ export const createProduct = async (req, res) => {
 
         await product.save();
         console.log("Product saved successfully!");
-        res.json({ success: true, name });
+        res.status(201).json({ success: true, message: "Product created successfully", product });
     } catch (error) {
         console.error("Error creating product:", error);
         res.status(500).json({ success: false, message: "Error creating product" });
@@ -47,7 +60,7 @@ export const createProduct = async (req, res) => {
 export const getProduct =async (req, res) => {
     try {
         const products = await Product.find({});
-        console.log("All products fetched successfully");
+        // console.log("All products fetched successfully");
         res.status(200).json(products);
     } catch (error) {
         console.error("Error fetching products:", error);

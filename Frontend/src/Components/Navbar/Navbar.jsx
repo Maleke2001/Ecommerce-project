@@ -3,10 +3,12 @@ import logo from '../Assets/logo.png';
 import { FaShoppingCart } from "react-icons/fa";
 import { Link } from 'react-router-dom';
 import { ShopContext } from '../../Context/ShopContext';
+import { useFetchCategory } from '../../Context/useFetchCategory';
 
 const Navbar = () => {
   const { getTotalCartItems } = useContext(ShopContext);
   const authToken = localStorage.getItem('auth-token');
+  const {categories} = useFetchCategory();
 
   return (
     <div className="flex items-center justify-between p-6 text-black -mt-4">
@@ -16,7 +18,16 @@ const Navbar = () => {
       </div>
 
       <ul className="flex space-x-6">
-        <li className="hover:text-orange-600 cursor-pointer">
+      {categories.length > 0 ? (
+    categories.map((category, index) => (
+      <li key={index} className="hover:text-orange-600 cursor-pointer">
+          <Link to="/nike">{category.name}</Link>
+        </li>
+    ))
+  ) : (
+    <option disabled>Loading categories...</option>
+  )}
+        {/* <li className="hover:text-orange-600 cursor-pointer">
           <Link to="/">Shop</Link>
         </li>
         <li className="hover:text-orange-600 cursor-pointer">
@@ -33,7 +44,7 @@ const Navbar = () => {
         </li>
         <li className="hover:text-orange-600 cursor-pointer">
           <Link to="/reebok">Reebok</Link>
-        </li>
+        </li> */}
       </ul>
 
       <div className="flex items-center space-x-4">

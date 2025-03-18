@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaCloudUploadAlt } from "react-icons/fa";
+import { useFetchCategory } from "../../../Frontend/src/Context/useFetchCategory";
 
 const AddProduct = () => {
   const [image, setImage] = useState(null);
@@ -10,6 +11,8 @@ const AddProduct = () => {
     new_price: "",
     old_price: "",
   });
+
+  const {categories} = useFetchCategory()
 
   const imageHandler = (e) => {
     const file = e.target.files[0];
@@ -148,17 +151,24 @@ const AddProduct = () => {
             Product Category
           </label>
           <select
-            value={productDetails.category}
-            onChange={changeHandler}
-            name="category"
-            className="w-full p-2 border border-gray-300 rounded"
-          >
-            <option value="Nike">Nike</option>
-            <option value="Adidas">Adidas</option>
-            <option value="Reebok">Reebok</option>
-            <option value="New Balance">New Balance</option>
-            <option value="Puma">Puma</option>
-          </select>
+  value={categories._id} // Use the selected category state here
+  onChange={changeHandler} // Handle category selection
+  name="category"
+  className="w-full p-2 border border-gray-300 rounded"
+>
+  <option value="" >Select a category</option>
+  {categories.length > 0 ? (
+    categories.map((category) => (
+      <option key={category._id} value={category._id}>
+        {category.name}
+      </option>
+    ))
+  ) : (
+    <option disabled>Loading categories...</option>
+  )}
+</select>
+{/* {error && <p className="text-red-500">{error}</p>} */}
+
         </div>
 
         {/* Upload Image */}
