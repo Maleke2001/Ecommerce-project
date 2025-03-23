@@ -1,12 +1,12 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { connectDB } from "./config/db.js";
+import connectDB from "./config/db.js";
 import productRoutes from "./routes/product.route.js";
-import userRoutes from "./routes/user.router.js";
-import uploadRoutes from "./routes/upload.routes.js"; // Import upload route
-import fs from "fs";
+import userRoutes from './routes/userRoutes.js';
+import uploadRoutes from "./routes/upload.routes.js";
 import categoryRoutes from "./routes/category.routes.js";
+import fs from "fs";
 
 dotenv.config();
 
@@ -31,8 +31,9 @@ app.use("/api/upload", uploadRoutes);
 
 // Register routes
 app.use("/api/product", productRoutes);
-app.use("/api/auth", userRoutes);
-app.use("/api/upload", uploadRoutes);  // Register upload route
+app.use("/api/users", userRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/upload", uploadRoutes);    // duplicate
 app.use("/api/category", categoryRoutes)
 
 
@@ -40,4 +41,15 @@ app.use("/api/category", categoryRoutes)
 app.listen(port, () => {
   connectDB();
   console.log(`Server running on port ${port}`);
+});
+
+
+// Add after your routes and before app.listen
+app.use((err, req, res, next) => {
+    const statusCode = err.statusCode || 500;
+    res.status(statusCode).json({
+        success: false,
+        message: err.message,
+        stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+    });
 });
