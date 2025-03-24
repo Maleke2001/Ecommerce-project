@@ -13,3 +13,9 @@ export const USER_STATUS = {
     INACTIVE: 'inactive',
     BLOCKED: 'blocked'
 };
+
+
+export const PERMISSIONS = {
+    [USER_ROLES.ADMIN]: ['create', 'read', 'update', 'delete'],
+    [USER_ROLES.USER]: ['read']
+};

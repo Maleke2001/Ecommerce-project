@@ -4,17 +4,17 @@ export const PRODUCT_STATUS = {
     LOW_STOCK: 'low_stock'
 };
 
-export const PRODUCT_CATEGORIES = {
-    NIKE: 'nike',
-    ADIDAS: 'adidas',
-    PUMA: 'puma',
-    NEWBALANCE:'new-balance',
-    REEBOOK:'reebook'
-};
+export const PRODUCT_CATEGORIES = ['nike', 'adidas', 'puma', 'new_balance', 'reebok'];
 
 export const SORT_OPTIONS = {
     PRICE_LOW_TO_HIGH: 'new_price',
     PRICE_HIGH_TO_LOW: '-new_price',
     NEWEST: '-createdAt',
     OLDEST: 'createdAt'
+};
+
+export const DEFAULT_SORT = SORT_OPTIONS.NEWEST;
+
+export const STOCK_THRESHOLDS = {
+    LOW_STOCK_LIMIT: 5 // Products with 5 or fewer items are considered "low stock"
 };
