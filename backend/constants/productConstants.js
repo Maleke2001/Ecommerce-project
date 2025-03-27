@@ -4,7 +4,14 @@ export const PRODUCT_STATUS = {
     LOW_STOCK: 'low_stock'
 };
 
-export const PRODUCT_CATEGORIES = ['nike', 'adidas', 'puma', 'new_balance', 'reebok'];
+export const PRODUCT_CATEGORIES = {
+    NIKE: 'nike',
+    ADIDAS: 'adidas',
+    PUMA: 'puma',
+    NEW_BALANCE: 'new_balance',
+    REEBOK: 'reebok'
+  };
+  
 
 export const SORT_OPTIONS = {
     PRICE_LOW_TO_HIGH: 'new_price',

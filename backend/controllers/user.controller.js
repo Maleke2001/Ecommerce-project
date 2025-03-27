@@ -1,82 +1,122 @@
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import User from "../models/User.js"; 
+import { asyncWrapper } from '../middleware/asyncHandler.js';
+import { registerSchema } from '../schemas/userSchema.js';
+import User from '../models/User.js';
+import { HTTP_STATUS } from '../constants/apiConstants.js';
+import { loginSchema } from '../schemas/userSchema.js';
+import generateToken from '../utils/generateToken.js';
 
-export const registerUser = async (req, res) => {
-    try {
-        console.log("Register user request received:", req.body); // Log the request body
-        const { name, email, password } = req.body;
-
-        console.log("Finding user with email:", email); // Log the email being searched
-        let user = await User.findOne({ email });
-        console.log("User found:", user); // Log the result of the findOne query
-
-        if (user) {
-            console.log("User already exists:", email); // Log if user already exists
-            return res.status(400).json({ success: false, errors: "User already exists" });
-        }
-
-        console.log("Generating salt..."); // Log before generating salt
-        const salt = await bcrypt.genSalt(10);
-        console.log("Salt generated:", salt); // Log the generated salt
-
-        console.log("Hashing password..."); // Log before hashing
-        const hashedPassword = await bcrypt.hash(password, salt);
-        console.log("Password hashed:", hashedPassword); // Log the hashed password
-
-        console.log("Creating new user..."); // Log before user creation
-        user = new User({ name, email, password: hashedPassword });
-        console.log("Saving user to database..."); // Log before saving
-        await user.save();
-        console.log("User saved to database"); // Log after saving the user
-
-        res.status(201).json({ success: true, message: "User registered successfully" });
-    } catch (error) {
-        console.error("Registration error:", error); // Log the full error
-        res.status(500).json({ success: false, errors: "Internal Server Error" });
+export const registerAdmin = asyncWrapper(async (req, res) => {
+    const result = adminRegisterSchema.safeParse(req.body);
+    
+    if (!result.success) {
+        res.status(HTTP_STATUS.BAD_REQUEST);
+        throw new Error(result.error.errors[0].message);
     }
-};
 
-export const loginUser = async (req, res) => {
-    try {
-        let user = await User.findOne({ email: req.body.email });
+    const { name, email, password, adminCode } = result.data;
 
-        if (!user) {
-            return res.status(400).json({ success: false, errors: "Wrong Email Id" });
-        }
-
-        if (!req.body.password || typeof req.body.password !== 'string') {
-            return res.status(400).json({ success: false, errors: "Invalid password input" });
-        }
-
-        if (!user.password || typeof user.password !== 'string') {
-            return res.status(500).json({ success: false, errors: "Password not found in database" });
-        }
-
-        // Compare passwords
-        const passCompare = await bcrypt.compare(req.body.password, user.password);
-
-        if (passCompare) {
-            const token = jwt.sign({ user: { id: user.id } }, 'secret_ecom');
-            return res.json({ success: true, token });
-        } else {
-            return res.status(400).json({ success: false, errors: "Wrong password" });
-        }
-
-    } catch (error) {
-        console.error("bcrypt error:", error);
-        res.status(500).json({ success: false, errors: "Internal Server Error" });
+    if (adminCode !== process.env.ADMIN_CODE) {
+        res.status(HTTP_STATUS.UNAUTHORIZED);
+        throw new Error('Invalid admin code');
     }
-};
 
-// controllers/user.controller.js
-// ... (Your existing registerUser and loginUser functions)
+    const adminExists = await User.findOne({ isAdmin: true });
+    if (adminExists) {
+        res.status(HTTP_STATUS.BAD_REQUEST);
+        throw new Error('Admin already exists');
+    }
 
-export const getProtectedData = (req, res) => {
-    // Access user data from req.user (set by the middleware)
-    res.json({
-      success: true,
-      message: "This is protected data",
-      user: req.user,
+    const admin = await User.create({
+        name,
+        email,
+        password,
+        isAdmin: true
     });
-  };
+
+    if (admin) {
+        res.status(HTTP_STATUS.CREATED).json({
+            _id: admin._id,
+            name: admin.name,
+            email: admin.email,
+            isAdmin: admin.isAdmin,
+            token: generateToken(admin._id)
+        });
+    }
+});
+
+export const registerUser = asyncWrapper(async (req, res) => {
+    // Validate request body using Zod
+    const result = registerSchema.safeParse(req.body);
+    
+    if (!result.success) {
+        res.status(HTTP_STATUS.BAD_REQUEST);
+        throw new Error(result.error.errors[0].message);
+    }
+
+    const { name, email, password } = result.data;
+    
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+        res.status(HTTP_STATUS.BAD_REQUEST);
+        throw new Error('User already exists');
+    }
+
+    const user = await User.create({
+        name,
+        email,
+        password
+    });
+
+    if (user) {
+        res.status(HTTP_STATUS.CREATED).json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            isAdmin: user.isAdmin
+        });
+    } else {
+        res.status(HTTP_STATUS.BAD_REQUEST);
+        throw new Error('Invalid user data');
+    }
+});
+
+export const loginUser = asyncWrapper(async (req, res) => {
+    // Validate request body
+    const result = loginSchema.safeParse(req.body);
+    
+    if (!result.success) {
+        res.status(HTTP_STATUS.BAD_REQUEST);
+        throw new Error(result.error.errors[0].message);
+    }
+
+    const { email, password } = result.data;
+
+    const user = await User.findOne({ email });
+    if (user && (await user.matchPassword(password))) {
+        res.status(HTTP_STATUS.OK).json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            isAdmin: user.isAdmin,
+            token: generateToken(user._id)
+        });
+    } else {
+        res.status(HTTP_STATUS.UNAUTHORIZED);
+        throw new Error('Invalid email or password');
+    }
+});
+
+export const getUserProfile = asyncWrapper(async (req, res) => {
+    const user = await User.findById(req.user._id);
+    if (user) {
+        res.status(API_ENDPOINTS.HTTP_STATUS.OK).json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            isAdmin: user.isAdmin
+        });
+    } else {
+        res.status(API_ENDPOINTS.HTTP_STATUS.NOT_FOUND);
+        throw new Error('User not found');
+    }
+});

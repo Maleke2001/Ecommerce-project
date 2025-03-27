@@ -1,35 +1,20 @@
-export const registerSchema = Joi.object({
-    name: Joi.string()
-        .trim()
-        .min(2)
-        .max(50)
-        .regex(/^[a-zA-Z\s]+$/) // Ensures only letters and spaces
-        .required()
-        .messages({
-            'string.empty': 'Name is required',
-            'string.min': 'Name must be at least 2 characters',
-            'string.max': 'Name must not exceed 50 characters',
-            'string.pattern.base': 'Name can only contain letters and spaces'
-        }),
+import { z } from 'zod';
 
-    email: Joi.string()
+export const registerSchema = z.object({
+    name: z.string()
         .trim()
-        .email()
-        .required()
-        .messages({
-            'string.empty': 'Email is required',
-            'string.email': 'Invalid email format'
-        }),
+        .min(2, { message: 'Name must be at least 2 characters' })
+        .max(50, { message: 'Name must not exceed 50 characters' })
+        .regex(/^[a-zA-Z\s]+$/, { message: 'Name can only contain letters and spaces' }),
 
-    password: Joi.string()
-        .min(6)
-        .max(30)
-        .required()
-        .pattern(new RegExp('^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$'))
-        .messages({
-            'string.empty': 'Password is required',
-            'string.min': 'Password must be at least 6 characters',
-            'string.max': 'Password must not exceed 30 characters',
-            'string.pattern.base': 'Password must include at least one uppercase letter, one lowercase letter, one number, and one special character'
+    email: z.string()
+        .trim()
+        .email({ message: 'Invalid email format' }),
+
+    password: z.string()
+        .min(6, { message: 'Password must be at least 6 characters' })
+        .max(30, { message: 'Password must not exceed 30 characters' })
+        .regex(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/, {
+            message: 'Password must include at least one uppercase letter, one lowercase letter, one number, and one special character'
         })
 });

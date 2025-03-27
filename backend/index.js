@@ -7,11 +7,12 @@ import userRoutes from './routes/userRoutes.js';
 import uploadRoutes from "./routes/upload.routes.js";
 import categoryRoutes from "./routes/category.routes.js";
 import fs from "fs";
+import { errorHandler } from './middleware/errorMiddleware.js';
 
 dotenv.config();
 
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5000; // Changed to 5001
 
 // Ensure that the upload directory exists
 const uploadDir = "./upload/images";
@@ -38,18 +39,18 @@ app.use("/api/category", categoryRoutes)
 
 
 // Start the server
-app.listen(port, () => {
+// Error handling should be after routes
+app.use(errorHandler);
+
+// Add error handling for the server
+const server = app.listen(port, () => {
   connectDB();
   console.log(`Server running on port ${port}`);
-});
-
-
-// Add after your routes and before app.listen
-app.use((err, req, res, next) => {
-    const statusCode = err.statusCode || 500;
-    res.status(statusCode).json({
-        success: false,
-        message: err.message,
-        stack: process.env.NODE_ENV === 'production' ? null : err.stack,
-    });
+}).on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.log(`Port ${port} is busy, trying ${port + 1}`);
+    server.listen(port + 1);
+  } else {
+    console.error('Server error:', err);
+  }
 });
