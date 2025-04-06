@@ -1,5 +1,5 @@
 import { asyncWrapper } from '../middleware/asyncHandler.js';
-import { registerSchema } from '../schemas/userSchema.js';
+import { registerSchema, loginSchema, adminRegisterSchema } from '../schemas/userSchema.js';
 import User from '../models/User.js';
 import { HTTP_STATUS } from '../constants/apiConstants.js';
 import { loginSchema } from '../schemas/userSchema.js';
@@ -39,11 +39,11 @@ export const registerAdmin = asyncWrapper(async (req, res) => {
             name: admin.name,
             email: admin.email,
             isAdmin: admin.isAdmin,
-            token: generateToken(admin._id)
+            token: generateToken(admin._id)  // Added token for admin
         });
     }
 });
-
+3
 export const registerUser = asyncWrapper(async (req, res) => {
     // Validate request body using Zod
     const result = registerSchema.safeParse(req.body);
