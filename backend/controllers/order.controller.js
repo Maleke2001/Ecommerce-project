@@ -1,10 +1,8 @@
 import { asyncWrapper } from '../middleware/asyncHandler.js';
 import Order from '../models/Order.js';
 import { HTTP_STATUS } from '../constants/apiConstants.js';
-import { createPaymentIntent } from '../services/paymentService.js';
 import { sendOrderConfirmation } from '../services/emailService.js';
 
-// Add to existing createOrder function
 export const createOrder = asyncWrapper(async (req, res) => {
     const { orderItems, shippingAddress, paymentMethod, totalPrice } = req.body;
 
@@ -18,29 +16,14 @@ export const createOrder = asyncWrapper(async (req, res) => {
         orderItems,
         shippingAddress,
         paymentMethod,
-        totalPrice
+        totalPrice,
+        isPaid: false
     });
 
-    // Create payment intent
-    const paymentIntent = await createPaymentIntent(totalPrice);
-    
-    // Send confirmation email
+    // Send order confirmation email
     await sendOrderConfirmation(order, req.user.email);
 
-    res.status(HTTP_STATUS.CREATED).json({
-        order,
-        clientSecret: paymentIntent.client_secret
-    });
-});
-
-export const getOrderById = asyncWrapper(async (req, res) => {
-    const order = await Order.findById(req.params.id).populate('user', 'name email');
-    
-    if (!order) {
-        res.status(HTTP_STATUS.NOT_FOUND);
-        throw new Error('Order not found');
-    }
-    res.json(order);
+    res.status(HTTP_STATUS.CREATED).json(order);
 });
 
 export const updateOrderToPaid = asyncWrapper(async (req, res) => {
@@ -51,17 +34,28 @@ export const updateOrderToPaid = asyncWrapper(async (req, res) => {
         throw new Error('Order not found');
     }
 
+    // Simple payment confirmation
     order.isPaid = true;
     order.paidAt = Date.now();
     order.paymentResult = {
-        id: req.body.id,
-        status: req.body.status,
-        update_time: req.body.update_time,
-        email_address: req.body.email_address
+        id: Date.now().toString(),
+        status: 'completed',
+        update_time: new Date().toISOString(),
+        payment_method: order.paymentMethod
     };
 
     const updatedOrder = await order.save();
-    res.json(updatedOrder);
+    res.status(HTTP_STATUS.OK).json(updatedOrder);
+});
+
+export const getOrderById = asyncWrapper(async (req, res) => {
+    const order = await Order.findById(req.params.id).populate('user', 'name email');
+    
+    if (!order) {
+        res.status(HTTP_STATUS.NOT_FOUND);
+        throw new Error('Order not found');
+    }
+    res.json(order);
 });
 
 export const getMyOrders = asyncWrapper(async (req, res) => {

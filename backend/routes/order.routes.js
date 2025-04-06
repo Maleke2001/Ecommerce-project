@@ -1,23 +1,32 @@
 import express from 'express';
-import { protect, isAdmin } from '../middleware/authMiddleware.js';
 import {
-    createOrder,
-    getOrderById,
-    updateOrderToPaid,
-    getMyOrders,
-    getOrders,
-    updateOrderToDelivered
+  createOrder,
+  getOrderById,
+  updateOrderToPaid,
+  getMyOrders,
+  getOrders,
+  updateOrderToDelivered,
 } from '../controllers/order.controller.js';
+import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.route('/')
-    .post(protect, createOrder)
-    .get(protect, isAdmin, getOrders);
+// POST /api/orders
+router.post('/', protect, createOrder);
 
-router.route('/myorders').get(protect, getMyOrders);
-router.route('/:id').get(protect, getOrderById);
-router.route('/:id/pay').put(protect, updateOrderToPaid);
-router.route('/:id/deliver').put(protect, isAdmin, updateOrderToDelivered);
+// GET /api/orders/myorders
+router.get('/myorders', protect, getMyOrders);
+
+// GET /api/orders/:id
+router.get('/:id', protect, getOrderById);
+
+// PUT /api/orders/:id/pay
+router.put('/:id/pay', protect, updateOrderToPaid);
+
+// PUT /api/orders/:id/deliver
+router.put('/:id/deliver', protect, updateOrderToDelivered);
+
+// GET /api/orders (admin route)
+router.get('/', protect, getOrders);
 
 export default router;
